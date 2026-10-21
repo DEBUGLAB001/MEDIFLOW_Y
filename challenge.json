@@ -1,0 +1,17 @@
+{
+  "name": "MediFlow — Hospital Emergency & Bed Allocation System",
+  "difficulty": "medium",
+  "runtime": "node-express",
+  "install_command": "npm install",
+  "start_command": "node --watch server.js",
+  "test_command": "npm test",
+  "preview_port": 3000,
+  "topics": [
+    "Priority Queue Scheduling",
+    "Visit Eligibility and State Management",
+    "Bed Compatibility and Lookup",
+    "Bed Allocation and Discharge State",
+    "Operational Statistics",
+    "Frontend State Synchronization"
+  ]
+}

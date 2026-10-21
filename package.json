@@ -1,0 +1,14 @@
+{
+  "name": "mediflow",
+  "version": "1.0.0",
+  "description": "MediFlow — Hospital Emergency & Bed Allocation System",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --watch server.js",
+    "test": "node tests/runner.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

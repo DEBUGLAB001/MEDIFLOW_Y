@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MediFlow — Hospital Emergency & Bed Allocation System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <!-- Hospital Command Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-symbol">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 4v16m-8-8h16" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>MediFlow</h1>
+        <span class="brand-subtitle">Emergency Intake & Bed Allocation Command</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="system-clock">
+        <span class="clock-label">SYSTEM TIME</span>
+        <span id="liveClock" class="clock-value">--:--:--</span>
+      </div>
+      <div class="status-indicator">
+        <span class="indicator-dot"></span>
+        <span class="indicator-text">OPS ACTIVE</span>
+      </div>
+      <button id="resetDemoBtn" class="btn btn-secondary btn-sm" title="Restore deterministic initial demo records">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Reset Demo Data
+      </button>
+    </div>
+  </header>
+
+  <!-- Key Operational Statistics Bar -->
+  <section class="kpi-strip">
+    <div class="kpi-card" id="kpiWaiting">
+      <div class="kpi-title">Waiting Assessment</div>
+      <div class="kpi-val" id="statWaiting">-</div>
+      <div class="kpi-sub">Priority queue</div>
+    </div>
+    <div class="kpi-card" id="kpiAssessment">
+      <div class="kpi-title">In Assessment</div>
+      <div class="kpi-val" id="statInAssessment">-</div>
+      <div class="kpi-sub">Clinical bays</div>
+    </div>
+    <div class="kpi-card" id="kpiAwaitingBed">
+      <div class="kpi-title">Awaiting Bed</div>
+      <div class="kpi-val" id="statAwaitingBed">-</div>
+      <div class="kpi-sub">Inpatient queue</div>
+    </div>
+    <div class="kpi-card" id="kpiOccupied">
+      <div class="kpi-title">Occupied Beds</div>
+      <div class="kpi-val" id="statOccupied">-</div>
+      <div class="kpi-sub" id="statOccupancyRate">-% occupancy</div>
+    </div>
+    <div class="kpi-card" id="kpiAvailable">
+      <div class="kpi-title">Available Beds</div>
+      <div class="kpi-val text-success" id="statAvailable">-</div>
+      <div class="kpi-sub" id="statTotalBeds">- total beds</div>
+    </div>
+    <div class="kpi-card" id="kpiDischarged">
+      <div class="kpi-title">Total Discharged</div>
+      <div class="kpi-val" id="statDischarged">-</div>
+      <div class="kpi-sub">Released patients</div>
+    </div>
+  </section>
+
+  <!-- Main Navigation Tabs -->
+  <nav class="nav-tabs" role="tablist">
+    <button class="nav-tab active" data-tab="queueTab" role="tab" aria-selected="true">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 010 7.75"></path>
+      </svg>
+      Emergency Triage & Queue
+    </button>
+    <button class="nav-tab" data-tab="bedsTab" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M2 4v16M2 8h18a2 2 0 012 2v10M2 17h20M6 8v9"></path>
+      </svg>
+      Bed Management Board
+    </button>
+    <button class="nav-tab" data-tab="directoryTab" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+      Patient Directory & Admissions
+    </button>
+    <button class="nav-tab" data-tab="auditTab" role="tab" aria-selected="false">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+      Operational Audit Log
+    </button>
+  </nav>
+
+  <!-- Main View Container -->
+  <main class="main-content">
+    
+    <!-- Tab 1: Emergency Triage Workspace -->
+    <section id="queueTab" class="tab-panel active">
+      <div class="workspace-grid">
+        
+        <!-- Registration Column -->
+        <div class="card registration-card">
+          <div class="card-header">
+            <h2>Emergency Intake Registration</h2>
+            <span class="card-tag">NEW ARRIVAL</span>
+          </div>
+          <form id="patientRegistrationForm" class="form-vertical">
+            <div class="form-group">
+              <label for="regPatientName">Patient Full Name <span class="required">*</span></label>
+              <input type="text" id="regPatientName" required placeholder="e.g. Eleanor Vance">
+            </div>
+
+            <div class="form-row">
+              <div class="form-group col-half">
+                <label for="regAge">Age <span class="required">*</span></label>
+                <input type="number" id="regAge" min="0" max="125" required placeholder="e.g. 45">
+              </div>
+              <div class="form-group col-half">
+                <label for="regTriageCategory">Simulated Triage Urgency <span class="required">*</span></label>
+                <select id="regTriageCategory" required>
+                  <option value="1">Category 1 — Resuscitation (Immediate)</option>
+                  <option value="2">Category 2 — Emergent (Very Urgent)</option>
+                  <option value="3" selected>Category 3 — Urgent</option>
+                  <option value="4">Category 4 — Less Urgent (Standard)</option>
+                  <option value="5">Category 5 — Non-Urgent</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="regRequiredCapability">Required Inpatient Care Capability</label>
+              <select id="regRequiredCapability">
+                <option value="general_acute" selected>General Acute Care</option>
+                <option value="cardiac_telemetry">Cardiac Telemetry</option>
+                <option value="critical_care">Critical Care / ICU</option>
+                <option value="isolation">Infectious Isolation</option>
+                <option value="pediatric">Pediatric Care</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="regComplaint">Chief Complaint / Triage Presentation <span class="required">*</span></label>
+              <textarea id="regComplaint" rows="2" required placeholder="Document presenting symptoms and initial observations..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="btnRegisterPatient">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Register & Enqueue Patient
+            </button>
+          </form>
+
+          <div class="triage-policy-note">
+            <strong>Operational Scheduling Policy:</strong>
+            Prioritization follows clinical triage category (1 to 5). Deterministic tie-breaking orders earlier arrivals first.
+          </div>
+        </div>
+
+        <!-- Priority Queue Column -->
+        <div class="card queue-card">
+          <div class="card-header flex-between">
+            <div>
+              <h2>Live Emergency Priority Queue</h2>
+              <span class="card-subtitle" id="queueSubtitle">Calculated with binary min-heap</span>
+            </div>
+            <button id="btnCallNext" class="btn btn-action">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              Call Next Patient
+            </button>
+          </div>
+
+          <!-- Active Assessment Banner -->
+          <div id="activeAssessmentBox" class="active-assessment-container hidden">
+            <div class="assessment-header">
+              <span class="pulse-dot"></span>
+              <strong>CURRENT PATIENT IN CLINICAL ASSESSMENT</strong>
+            </div>
+            <div class="assessment-body" id="activeAssessmentBody">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="queueTable">
+              <thead>
+                <tr>
+                  <th width="60">Rank</th>
+                  <th>Patient & ID</th>
+                  <th>Triage Category</th>
+                  <th>Complaint</th>
+                  <th>Wait Time</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="queueTableBody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Tab 2: Bed Management Board -->
+    <section id="bedsTab" class="tab-panel">
+      <!-- Bed Controls & Filter Bar -->
+      <div class="bed-filters-bar">
+        <div class="filter-group">
+          <label for="filterWard">Ward Unit:</label>
+          <select id="filterWard">
+            <option value="ALL">All Wards</option>
+            <option value="ER">Emergency Unit (ER)</option>
+            <option value="ICU">Intensive Care Unit (ICU)</option>
+            <option value="TEL">Cardiac Telemetry (TEL)</option>
+            <option value="MED">General Medical (MED)</option>
+            <option value="PED">Pediatric Ward (PED)</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filterCapability">Capability:</label>
+          <select id="filterCapability">
+            <option value="ALL">All Capabilities</option>
+            <option value="general_acute">General Acute</option>
+            <option value="cardiac_telemetry">Cardiac Telemetry</option>
+            <option value="critical_care">Critical Care</option>
+            <option value="isolation">Isolation</option>
+            <option value="pediatric">Pediatric</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filterStatus">Status:</label>
+          <select id="filterStatus">
+            <option value="ALL">All Statuses</option>
+            <option value="AVAILABLE">Available</option>
+            <option value="OCCUPIED">Occupied</option>
+            <option value="CLEANING">Cleaning / Maintenance</option>
+          </select>
+        </div>
+
+        <div class="filter-summary" id="bedFilterSummary">
+          Showing 16 beds
+        </div>
+      </div>
+
+      <!-- Bed Cards Grid -->
+      <div class="beds-grid" id="bedsGrid">
+        <!-- Dynamically rendered bed cards -->
+      </div>
+    </section>
+
+    <!-- Tab 3: Patient Directory & Admissions -->
+    <section id="directoryTab" class="tab-panel">
+      <div class="card">
+        <div class="card-header flex-between">
+          <h2>Patient Directory & Visit Lifecycle</h2>
+          <div class="table-tools">
+            <select id="filterVisitStatus">
+              <option value="ALL">All Visit States</option>
+              <option value="WAITING">Waiting</option>
+              <option value="IN_ASSESSMENT">In Assessment</option>
+              <option value="AWAITING_BED">Awaiting Bed</option>
+              <option value="ADMITTED">Admitted</option>
+              <option value="DISCHARGED">Discharged</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="directoryTable">
+            <thead>
+              <tr>
+                <th>Visit ID</th>
+                <th>Patient</th>
+                <th>Age</th>
+                <th>Triage</th>
+                <th>Arrival</th>
+                <th>Care Requirement</th>
+                <th>Assigned Bed</th>
+                <th>Current Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="directoryTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab 4: Operational Audit Log -->
+    <section id="auditTab" class="tab-panel">
+      <div class="card">
+        <div class="card-header">
+          <h2>Hospital Operational Event Log</h2>
+          <span class="card-subtitle">Immutable audit trail of emergency intake, bed allocations, and discharges</span>
+        </div>
+        <div class="audit-feed" id="auditFeed">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: Allocate Bed -->
+  <div id="allocateModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="allocateModalTitle">Allocate Inpatient Bed</h3>
+        <button class="modal-close" data-close="allocateModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro" id="allocateBedInfo">Selected Bed: <strong>BED-ER-01</strong></p>
+        <div class="form-group">
+          <label for="allocateVisitSelect">Select Eligible Patient:</label>
+          <select id="allocateVisitSelect" class="form-control">
+            <!-- Options dynamically loaded -->
+          </select>
+        </div>
+        <div id="allocateCompatibilityNotice" class="notice-box info">
+          Bed compatibility rules will be enforced during allocation.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="allocateModal">Cancel</button>
+        <button id="btnConfirmAllocate" class="btn btn-primary">Confirm Allocation</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Transfer Patient -->
+  <div id="transferModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Transfer Patient to Compatible Bed</h3>
+        <button class="modal-close" data-close="transferModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro" id="transferPatientInfo">Patient: <strong>Trillian Astra</strong></p>
+        <div class="form-group">
+          <label for="transferBedSelect">Select Destination Bed:</label>
+          <select id="transferBedSelect" class="form-control">
+            <!-- Options dynamically loaded -->
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="transferModal">Cancel</button>
+        <button id="btnConfirmTransfer" class="btn btn-primary">Confirm Transfer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
